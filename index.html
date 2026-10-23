@@ -1,0 +1,988 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>SDG Round Robin OS Visualizer</title>
+
+<style>
+* {
+    box-sizing: border-box;
+}
+
+body {
+    margin: 0;
+    font-family: Arial, sans-serif;
+    background: #f1f5f9;
+    color: #17243a;
+}
+header {
+    background: linear-gradient(120deg, #142b52, #2457d6);
+    color: white;
+    padding: 25px 18px;
+    text-align: center;
+}
+
+header h1 {
+    margin: 0 0 10px;
+}
+
+header p {
+    margin: 0;
+}
+
+main {
+    max-width: 1150px;
+    margin: auto;
+    padding: 20px;
+}
+
+.card {
+    background: white;
+    padding: 20px;
+    margin-bottom: 20px;
+    border-radius: 14px;
+    box-shadow: 0 4px 15px #0000000d;
+    overflow-x: auto;
+}
+
+h2 {
+    margin-top: 0;
+    color: #2457d6;
+}
+
+button, select, input {
+    padding: 9px;
+border-radius: 7px;
+    border: 1px solid #cbd5e1;
+    font-size: 14px;
+}
+
+button {
+    cursor: pointer;
+    background: #2457d6;
+    color: white;
+    border: none;
+    margin: 4px 2px;
+}
+
+button:hover {
+    opacity: 0.85;
+}
+
+.delete {
+    background: #dc3545;
+}
+
+.secondary {
+    background: #64748b;
+}
+
+.controls {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 10px;
+    align-items: center;
+    margin-bottom: 15px;
+}
+
+table {
+    width: 100%;
+    border-collapse: collapse;
+    min-width: 600px;
+}
+
+th, td {
+    padding: 10px;
+    border-bottom: 1px solid #e2e8f0;
+    text-align: center;
+}
+
+th {
+    background: #e8efff;
+}
+
+td input {
+    width: 100%;
+    min-width: 70px;
+}
+
+.tabs {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+    margin-bottom: 20px;
+}
+
+.tabs button {
+    padding: 12px 16px;
+}
+
+.tabs .active {
+    background: #0f9d91;
+}
+
+.metrics {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+    gap: 12px;
+}
+
+.metric {
+    background: #edf4ff;
+    padding: 15px;
+    border-radius: 10px;
+}
+.metric h3 {
+    font-size: 13px;
+    margin: 0 0 8px;
+    color: #52627a;
+}
+
+.metric p {
+    font-size: 23px;
+    font-weight: bold;
+    margin: 0;
+}
+
+.gantt {
+    display: flex;
+    gap: 4px;
+    overflow-x: auto;
+    padding: 20px 5px 30px;
+    min-height: 100px;
+}
+
+.block {
+    min-width: 65px;
+    flex: var(--duration) 0 0;
+    background: #2457d6;
+    color: white;
+    text-align: center;
+    padding: 15px 5px;
+    border-radius: 7px;
+    font-weight: bold;
+    position: relative;
+}
+
+.block small {
+    display: block;
+    margin-top: 5px;
+}
+
+.block .time {
+    position: absolute;
+    bottom: -22px;
+    left: 0;
+    right: 0;
+    font-size: 11px;
+    color: #334155;
+    font-weight: normal;
+}
+
+.context {
+    background: repeating-linear-gradient(
+        135deg,
+        #64748b,
+        #64748b 6px,
+        #94a3b8 6px,
+        #94a3b8 12px
+    );
+}
+
+.idle {
+    background: #a1a1aa;
+}
+
+.current {
+    outline: 4px solid #fbbf24;
+}
+
+.status {
+    background: #effbf8;
+    border-left: 4px solid #0f9d91;
+    padding: 12px;
+    margin-top: 12px;
+    border-radius: 5px;
+}
+
+footer {
+    text-align: center;
+    padding: 20px;
+    color: #64748b;
+    font-size: 13px;
+}
+
+@media(max-width: 600px) {
+    main {
+        padding: 10px;
+    }
+
+    .card {
+        padding: 14px;
+    }
+
+    header h1 {
+        font-size: 24px;
+    }
+}
+</style>
+</head>
+
+<body>
+
+<header>
+    <h1>SDG CPU Scheduling Visualizer</h1>
+    <p>Operating Systems | Round Robin Scheduling Simulation</p>
+    <p>SDG 6 • SDG 11 • SDG 12 • SDG 13</p>
+</header>
+
+<main>
+
+    <div class="tabs">
+        <button id="tab1" class="active" onclick="changeActivity(1)">
+            Activity 1: Without Overhead
+        </button>
+
+        <button id="tab2" onclick="changeActivity(2)">
+            Activity 2: With Overhead
+        </button>
+    </div>
+<section class="card">
+        <h2 id="activityTitle">Municipal Sustainability Services</h2>
+        <p id="activityDescription">
+            Round Robin scheduling without context-switching overhead.
+        </p>
+
+        <div class="controls">
+            <label>
+                Time Quantum:
+                <input type="number" id="quantum" min="1" value="2">
+                ms
+            </label>
+
+            <label>
+                Context Switch Overhead:
+                <input type="number" id="overhead" min="0" value="0">
+                ms
+            </label>
+
+            <button onclick="runSimulation()">Run Simulation</button>
+            <button class="secondary" onclick="compareResults()">
+                Compare Quanta
+            </button>
+        </div>
+    </section>
+
+    <section class="card">
+        <h2>Process Management</h2>
+        <p>Edit the process name, arrival time and burst time.</p>
+
+        <button onclick="addProcess()">+ Add Process</button>
+
+        <table>
+            <thead>
+                <tr>
+                    <th>Process</th>
+                    <th>Sustainability Task</th>
+                    <th>Arrival (ms)</th>
+                    <th>Burst (ms)</th>
+                    <th>Action</th>
+                </tr>
+            </thead>
+            <tbody id="processTable"></tbody>
+        </table>
+    </section>
+
+    <section class="card">
+        <h2>OS Visualizer: CPU Gantt Chart</h2>
+
+        <div class="controls">
+            <button onclick="playSimulation()">▶ Play</button>
+            <button onclick="stepSimulation()">Step →</button>
+            <button class="secondary" onclick="resetSimulation()">Reset</button>
+            <span id="clock">Time: 0 ms</span>
+        </div>
+
+        <div class="gantt" id="gantt">
+            Run the simulation to view the Gantt chart.
+        </div>
+
+        <div class="status" id="status">
+            Ready to simulate. Processes execute according to Round Robin.
+        </div>
+    </section>
+
+    <section class="card">
+        <h2>Performance Metrics</h2>
+
+        <div class="metrics" id="metrics"></div>
+
+        <h3>Process-wise Results</h3>
+
+        <table>
+            <thead>
+                <tr>
+                    <th>Process</th>
+                    <th>Completion</th>
+                    <th>Turnaround</th>
+                    <th>Waiting</th>
+                    <th>Response</th>
+                </tr>
+            </thead>
+            <tbody id="resultsTable"></tbody>
+        </table>
+    </section>
+
+    <section class="card">
+        <h2>Time Quantum Comparison</h2>
+
+        <p>
+            Activity 1 compares quantum 2 ms and 3 ms.
+            Activity 2 compares quantum 2 ms and 4 ms.
+        </p>
+
+        <table>
+            <thead>
+                <tr>
+                    <th>Quantum</th>
+                    <th>Avg Turnaround</th>
+                    <th>Avg Waiting</th>
+                    <th>Avg Response</th>
+                    <th>Switches</th>
+                    <th>Overhead</th>
+                    <th>CPU Efficiency</th>
+                </tr>
+</thead>
+            <tbody id="comparisonTable"></tbody>
+        </table>
+
+        <div class="status" id="recommendation">
+            Run the comparison to see the results.
+        </div>
+    </section>
+
+</main>
+
+<footer>
+    SDG-Based Round Robin CPU Scheduling | Interactive OS Lab
+</footer>
+
+<script>
+const initialData = {
+    1: {
+        title: "Municipal Sustainability Services",
+        description:
+            "SDG 6: Clean Water | SDG 11: Sustainable Cities | SDG 12: Responsible Consumption",
+        quantum: 2,
+        overhead: 0,
+        processes: [
+            {id:"P1", task:"Water-quality monitoring", arrival:0, burst:5},
+            {id:"P2", task:"Waste-collection scheduling", arrival:1, burst:3},
+            {id:"P3", task:"Traffic-pollution analysis", arrival:2, burst:4},
+            {id:"P4", task:"Public energy-use monitoring", arrival:3, burst:2}
+        ]
+    },
+
+    2: {
+        title: "Climate Emergency Response Centre",
+        description:
+            "SDG 11: Sustainable Cities | SDG 13: Climate Action",
+        quantum: 2,
+        overhead: 1,
+        processes: [
+            {id:"P1", task:"Flood-warning analysis", arrival:0, burst:5},
+            {id:"P2", task:"Air-quality alert generation", arrival:1, burst:4},
+            {id:"P3", task:"Emergency evacuation-route update", arrival:2, burst:3},
+            {id:"P4", task:"Renewable-grid status monitoring", arrival:3, burst:2}
+        ]
+    }
+};
+
+const colors = [
+    "#2457d6", "#0f9d91", "#a15bd6", "#e58a22",
+    "#d64b5b", "#3478a8", "#708b2f", "#bd5b83"
+];
+
+let activity = 1;
+let processes = [];
+let schedule = [];
+let result = null;
+let stepIndex = -1;
+let playTimer = null;
+
+function escapeHTML(value) {
+    return String(value).replace(/[&<>"']/g, char => ({
+        "&":"&amp;", "<":"&lt;", ">":"&gt;",
+        '"':"&quot;", "'":"&#39;"
+    })[char]);
+}
+
+function changeActivity(number) {
+    stopPlayback();
+    activity = number;
+
+    const data = initialData[number];
+
+    processes = JSON.parse(JSON.stringify(data.processes));
+
+    document.getElementById("activityTitle").textContent = data.title;
+    document.getElementById("activityDescription").textContent = data.description;
+    document.getElementById("quantum").value = data.quantum;
+    document.getElementById("overhead").value = data.overhead;
+    document.getElementById("overhead").disabled = number === 1;
+
+    document.getElementById("tab1").classList.toggle("active", number === 1);
+    document.getElementById("tab2").classList.toggle("active", number === 2);
+
+    renderProcesses();
+    runSimulation();
+}
+
+function renderProcesses() {
+    const tbody = document.getElementById("processTable");
+    tbody.innerHTML = "";
+
+    processes.forEach((p, index) => {
+        const row = document.createElement("tr");
+
+        row.innerHTML = `
+            <td><b>${p.id}</b></td>
+
+            <td>
+                <input type="text" data-index="${index}"
+                    data-field="task" value="${escapeHTML(p.task)}">
+            </td>
+
+            <td>
+                <input type="number" min="0" step="1"
+data-index="${index}" data-field="arrival"
+                    value="${p.arrival}">
+            </td>
+
+            <td>
+                <input type="number" min="1" step="1"
+                    data-index="${index}" data-field="burst"
+                    value="${p.burst}">
+            </td>
+
+            <td>
+                <button class="delete" data-remove="${index}">
+                    Remove
+                </button>
+            </td>
+        `;
+
+        tbody.appendChild(row);
+    });
+
+    tbody.querySelectorAll("input").forEach(input => {
+        input.addEventListener("change", function() {
+            const index = Number(this.dataset.index);
+            const field = this.dataset.field;
+            let value = this.value;
+
+            if (field !== "task") {
+                value = Number(value);
+
+                if (
+                    !Number.isInteger(value) ||
+                    value < (field === "burst" ? 1 : 0)
+                ) {
+                    alert("Enter a valid non-negative arrival time and positive burst time.");
+                    renderProcesses();
+                    return;
+                }
+            }
+
+            processes[index][field] = value;
+        });
+    });
+
+    tbody.querySelectorAll("[data-remove]").forEach(button => {
+        button.addEventListener("click", () => {
+            if (processes.length <= 1) {
+                alert("At least one process is required.");
+return;
+            }
+
+            processes.splice(Number(button.dataset.remove), 1);
+            renumberProcesses();
+            renderProcesses();
+        });
+    });
+}
+
+function renumberProcesses() {
+    processes.forEach((p, i) => {
+        p.id = "P" + (i + 1);
+    });
+}
+
+function addProcess() {
+    processes.push({
+        id: "P" + (processes.length + 1),
+        task: "New sustainability task",
+        arrival: 0,
+        burst: 2
+    });
+
+    renderProcesses();
+}
+
+function simulate(quantum, overhead) {
+    if (!Number.isInteger(quantum) || quantum < 1) {
+        throw new Error("Time quantum must be a positive integer.");
+    }
+
+    if (!Number.isInteger(overhead) || overhead < 0) {
+        throw new Error("Overhead must be a non-negative integer.");
+    }
+
+    if (processes.length === 0) {
+        throw new Error("Add at least one process.");
+    }
+
+    const ps = processes.map((p, index) => ({
+        ...p,
+        arrival: Number(p.arrival),
+        burst: Number(p.burst),
+        remaining: Number(p.burst),
+        firstStart: null,
+        completion: null,
+        index
+    }));
+
+    if (ps.some(p =>
+        !Number.isInteger(p.arrival) ||
+        p.arrival < 0 ||
+        !Number.isInteger(p.burst) ||
+        p.burst < 1
+    )) {
+        throw new Error("Invalid process arrival or burst time.");
+    }
+
+    ps.sort((a, b) =>
+        a.arrival - b.arrival || a.index - b.index
+    );
+
+    let time = 0;
+    let next = 0;
+    let completed = 0;
+    let previousProcess = null;
+    let switches = 0;
+    let overheadTotal = 0;
+
+    const readyQueue = [];
+    const timeline = [];
+
+    function addArrivals() {
+        while (
+            next < ps.length &&
+            ps[next].arrival <= time
+        ) {
+            readyQueue.push(ps[next]);
+            next++;
+        }
+    }
+
+    while (completed < ps.length) {
+        addArrivals();
+
+        if (readyQueue.length === 0) {
+            if (next < ps.length) {
+                const nextArrival = ps[next].arrival;
+
+                if (nextArrival > time) {
+                    timeline.push({
+                        type: "idle",
+                        start: time,
+                        end: nextArrival,
+                        duration: nextArrival - time
+                    });
+
+                    time = nextArrival;
+                }
+
+                addArrivals();
+            }
+
+            if (readyQueue.length === 0) {
+                continue;
+            }
+        }
+
+        const p = readyQueue.shift();
+
+        if (
+            previousProcess !== null &&
+            previousProcess.id !== p.id &&
+            overhead > 0
+        ) {
+            timeline.push({
+                type: "cs",
+                from: previousProcess.id,
+                to: p.id,
+                start: time,
+                end: time + overhead,
+                duration: overhead
+            });
+
+            time += overhead;
+            overheadTotal += overhead;
+
+            // Processes arriving during a context switch join
+            // the ready queue before the next CPU slice.
+            addArrivals();
+        }
+
+        if (
+            previousProcess !== null &&
+            previousProcess.id !== p.id
+        ) {
+            switches++;
+        }
+
+        const start = time;
+
+        if (p.firstStart === null) {
+            p.firstStart = start;
+        }
+
+        const duration = Math.min(quantum, p.remaining);
+
+        timeline.push({
+            type: "process",
+            id: p.id,
+            task: p.task,
+            start,
+            end: time + duration,
+            duration,
+            index: p.index
+        });
+
+        time += duration;
+        p.remaining -= duration;
+
+        addArrivals();
+
+        if (p.remaining > 0) {
+            readyQueue.push(p);
+        } else {
+            p.completion = time;
+            completed++;
+        }
+
+        previousProcess = p;
+    }
+
+    const rows = ps.map(p => {
+        const turnaround = p.completion - p.arrival;
+        const waiting = turnaround - p.burst;
+        const response = p.firstStart - p.arrival;
+
+        return {
+            ...p,
+            turnaround,
+            waiting,
+            response
+        };
+    });
+
+    const average = key =>
+        rows.reduce((sum, p) => sum + p[key], 0) / rows.length;
+
+    const totalBurst = rows.reduce(
+        (sum, p) => sum + p.burst, 0
+    );
+
+    const endTime = timeline.length
+        ? timeline[timeline.length - 1].end
+        : 0;
+
+    return {
+        timeline,
+        rows,
+        avgTurnaround: average("turnaround"),
+        avgWaiting: average("waiting"),
+        avgResponse: average("response"),
+        switches,
+        overheadTotal,
+        efficiency: endTime ? totalBurst / endTime * 100 : 100,
+        endTime
+    };
+}
+
+function fmt(value) {
+    return Number(value).toFixed(2).replace(/\.00$/, "");
+}
+
+function runSimulation() {
+    stopPlayback();
+
+    try {
+        const quantum = Number(document.getElementById("quantum").value);
+        const overhead = activity === 1
+            ? 0
+            : Number(document.getElementById("overhead").value);
+
+        result = simulate(quantum, overhead);
+        schedule = result.timeline;
+        stepIndex = -1;
+
+        renderGantt();
+        renderMetrics();
+        renderResults();
+
+        document.getElementById("clock").textContent = "Time: 0 ms";
+        document.getElementById("status").textContent =
+            "Simulation complete. Use Play or Step to inspect the schedule.";
+
+        compareResults();
+    } catch (error) {
+        alert(error.message);
+    }
+}
+function renderGantt() {
+    const gantt = document.getElementById("gantt");
+
+    if (!schedule.length) {
+        gantt.textContent = "No schedule available.";
+        return;
+    }
+
+    gantt.innerHTML = schedule.map((s, i) => {
+        let label = "";
+        let className = "block";
+        let color = "#2457d6";
+
+        if (s.type === "process") {
+            label = s.id;
+
+            const pIndex = processes.findIndex(p => p.id === s.id);
+            color = colors[(pIndex + colors.length) % colors.length];
+        } else if (s.type === "cs") {
+            label = "CS";
+            className += " context";
+        } else {
+            label = "IDLE";
+            className += " idle";
+        }
+
+        const title = s.type === "cs"
+            ? `Context switch ${s.from} to ${s.to}`
+            : s.type === "process"
+                ? s.task
+                : "CPU idle";
+
+        return `
+            <div class="${className}"
+                data-step="${i}"
+                style="--duration:${Math.max(1, s.duration)};
+                ${s.type === "process" ? "background:" + color : ""}"
+                title="${escapeHTML(title)}">
+
+                ${label}
+                <small>${s.duration} ms</small>
+
+                <span class="time">
+                    ${s.start}–${s.end}
+                </span>
+            </div>
+        `;
+    }).join("");
+}
+
+function renderMetrics() {
+    const r = result;
+
+    const cards = [
+        ["Average Turnaround", fmt(r.avgTurnaround) + " ms"],
+        ["Average Waiting", fmt(r.avgWaiting) + " ms"],
+        ["Average Response", fmt(r.avgResponse) + " ms"],
+        ["Context Switches", r.switches]
+    ];
+
+    if (activity === 2) {
+        cards.push(
+            ["Switch Overhead", fmt(r.overheadTotal) + " ms"],
+            ["CPU Efficiency", fmt(r.efficiency) + "%"]
+        );
+    }
+
+    document.getElementById("metrics").innerHTML =
+        cards.map(c => `
+            <div class="metric">
+                <h3>${c[0]}</h3>
+                <p>${c[1]}</p>
+            </div>
+        `).join("");
+}
+
+function renderResults() {
+    document.getElementById("resultsTable").innerHTML =
+        result.rows
+            .slice()
+            .sort((a, b) => a.index - b.index)
+            .map(p => `
+                <tr>
+                    <td>${p.id}</td>
+                    <td>${p.completion} ms</td>
+                    <td>${p.turnaround} ms</td>
+                    <td>${p.waiting} ms</td>
+                    <td>${p.response} ms</td>
+                </tr>
+            `).join("");
+}
+
+function compareResults() {
+    try {
+        const overhead = activity === 1
+            ? 0
+            : Number(document.getElementById("overhead").value);
+
+        const q1 = 2;
+        const q2 = activity === 1 ? 3 : 4;
+
+        const a = simulate(q1, overhead);
+        const b = simulate(q2, overhead);
+
+        const comparisons = [
+            [q1, a],
+            [q2, b]
+        ];
+
+        document.getElementById("comparisonTable").innerHTML =
+            comparisons.map(([q, r]) => `
+                <tr>
+                    <td>${q} ms</td>
+                    <td>${fmt(r.avgTurnaround)} ms</td>
+                    <td>${fmt(r.avgWaiting)} ms</td>
+                    <td>${fmt(r.avgResponse)} ms</td>
+                    <td>${r.switches}</td>
+                    <td>${fmt(r.overheadTotal)} ms</td>
+                    <td>${fmt(r.efficiency)}%</td>
+                </tr>
+            `).join("");
+
+        const score = r =>
+            r.avgWaiting + r.avgResponse +
+            (activity === 2 ? r.overheadTotal * 0.5 : 0);
+
+        const best = score(a) <= score(b)
+            ? [q1, a]
+            : [q2, b];
+
+        document.getElementById("recommendation").textContent =
+            `Based on average waiting, response and overhead, ` +
+            `quantum ${best[0]} ms has the lower combined indicator. ` +
+            `Review the individual response times and switch count too, ` +
+            `especially for emergency services.`;
+    } catch (error) {
+        document.getElementById("comparisonTable").innerHTML =
+            `<tr><td colspan="7">${escapeHTML(error.message)}</td></tr>`;
+    }
+}
+
+function stepSimulation() {
+    stopPlayback();
+
+    if (!schedule.length) return;
+
+    if (stepIndex < schedule.length - 1) {
+        stepIndex++;
+    }
+
+    showStep();
+}
+
+function showStep() {
+    document.querySelectorAll(".block").forEach((block, i) => {
+        block.classList.toggle("current", i === stepIndex);
+    });
+
+    const s = schedule[stepIndex];
+
+    if (!s) return;
+
+    document.getElementById("clock").textContent =
+        `Time: ${s.start}–${s.end} ms`;
+
+    if (s.type === "process") {
+        document.getElementById("status").textContent =
+            `${s.id} (${s.task}) executes from ${s.start} to ${s.end} ms.`;
+    } else if (s.type === "cs") {
+        document.getElementById("status").textContent =
+            `Context switch from ${s.from} to ${s.to}: ` +
+            `${s.start}–${s.end} ms.`;
+    } else {
+        document.getElementById("status").textContent =
+            `CPU idle from ${s.start} to ${s.end} ms.`;
+    }
+}
+
+function playSimulation() {
+    if (!schedule.length) return;
+
+    if (playTimer) {
+        stopPlayback();
+        return;
+    }
+
+    if (stepIndex >= schedule.length - 1) {
+        stepIndex = -1;
+    }
+
+    function tick() {
+        if (stepIndex >= schedule.length - 1) {
+            stopPlayback();
+            return;
+        }
+
+        stepIndex++;
+        showStep();
+
+        playTimer = setTimeout(tick, 650);
+    }
+
+    tick();
+}
+
+function stopPlayback() {
+    if (playTimer) {
+        clearTimeout(playTimer);
+        playTimer = null;
+    }
+}
+
+function resetSimulation() {
+    stopPlayback();
+    stepIndex = -1;
+
+    document.querySelectorAll(".block").forEach(block => {
+        block.classList.remove("current");
+    });
+
+    document.getElementById("clock").textContent = "Time: 0 ms";
+    document.getElementById("status").textContent =
+        "Timeline reset. Click Play or Step to begin.";
+}
+
+document.getElementById("quantum").addEventListener("change", () => {
+    const input = document.getElementById("quantum");
+
+    if (Number(input.value) < 1) input.value = 1;
+});
+
+document.getElementById("overhead").addEventListener("change", () => {
+    const input = document.getElementById("overhead");
+
+    if (Number(input.value) < 0) input.value = 0;
+});
+
+// Start with Activity 1.
+changeActivity(1);
+</script>
+
+</body>
+</html>
